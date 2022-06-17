@@ -1,20 +1,10 @@
-import { envconfig } from "./utils/config";
+import envconfig from "./utils/config";
 import { HardhatUserConfig, task } from "hardhat/config";
 import "@typechain/hardhat";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-deploy";
 import "hardhat-gas-reporter";
 import "hardhat-contract-sizer";
-
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -29,20 +19,36 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    rinkeby: {
-      url: envconfig.rinkeby.provider_url,
-      //   accounts: [`0x${envconfig.rinkeby.private_key}`],
+    hardhat: {
+      ...envconfig.hardhat,
     },
-    mainnet: {
-      url: envconfig.mainnet.provider_url,
-      //   accounts: [`0x${envconfig.mainnet.private_key}`],
+    mumbai: {
+      url: envconfig.providerUrls.mumbai,
+      accounts: [
+        `0x${envconfig.accounts.deployer.mumbai.private_key}`,
+        `0x${envconfig.accounts.player1.mumbai.private_key}`,
+        `0x${envconfig.accounts.player2.mumbai.private_key}`,
+      ],
     },
   },
   namedAccounts: {
     deployer: {
       default: 0,
-      rinkeby: `privatekey://${envconfig.rinkeby.private_key}`,
-      mainnet: `privatekey://${envconfig.mainnet.private_key}`,
+      mumbai: envconfig.accounts.deployer.mumbai
+        ? `privatekey://${envconfig.accounts.deployer.mumbai.private_key}`
+        : null,
+    },
+    player1: {
+      default: 1,
+      mumbai: envconfig.accounts.player1.mumbai
+        ? `privatekey://${envconfig.accounts.player1.mumbai.private_key}`
+        : null,
+    },
+    player2: {
+      default: 2,
+      mumbai: envconfig.accounts.player2.mumbai
+        ? `privatekey://${envconfig.accounts.player2.mumbai.private_key}`
+        : null,
     },
   },
   typechain: {
@@ -51,5 +57,15 @@ const config: HardhatUserConfig = {
   },
   contractSizer: {},
 };
+
+// This is a sample Hardhat task. To learn how to create your own go to
+// https://hardhat.org/guides/create-task.html
+task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+  const accounts = await hre.ethers.getSigners();
+
+  for (const account of accounts) {
+    console.log(account.address);
+  }
+});
 
 export default config;
